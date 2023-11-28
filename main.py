@@ -180,6 +180,7 @@ def show(sequence=''):
     """Displays recorded contacts"""
     status = 'OK'
     message = ''
+    start_len = len(sequence)
 
     # lim:N
     lim_ptrn = r'\blim:\d+\b'
@@ -209,7 +210,7 @@ def show(sequence=''):
 
     # no params = show from 0 to len()
     # only lim is set: lim + range_ 0 to len()
-    if len(sequence) == 0 or (len(lim) == 1 and len(range_) == 0):
+    if start_len == 0 or (len(lim) == 1 and len(range_) == 0):
         range_ = [f'0-{len(address_book.data)}']
 
     header = (f'+{"=":=^5}+{"=":=^15}+{"=":=^15}+'

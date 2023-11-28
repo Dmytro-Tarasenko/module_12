@@ -348,7 +348,8 @@ def find(sequence=''):
         phones_ = phones_.split('#')
         phone0 = '-' if len(phones_) == 0 else phones_[0]
         bday_ = bday_ if bday_ != 'none' else '-'
-        rows += f'|{id_:^5}|{name_:^17}|{phone0:^17}|{bday_:^12}|\n'
+        rows += (f'|{id_:^5}|{name_.capitalize():^17}|'
+                 + f'{phone0:^17}|{bday_:^12}|\n')
         for phone in phones_[1:]:
             rows += f'|{"":<5}|{"":<17}|{phone:^17}|{"":^12}|\n'
         rows += footer

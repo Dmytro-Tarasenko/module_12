@@ -16,4 +16,5 @@ data.bin - містить згенеровані 12 контактів та 1 д
 Кількість згенерованих записів залежиьт від 
 pag_lim та pgs та дорівнює 
 num_records = pag_lim * pgs + random.randrange(0, pag_lim)
+
 TODO: реалізувати через Faker

@@ -162,7 +162,7 @@ class Record:
     def as_search_string(self):
         ret = (f'{self.name.value}::'
                + f'{"#".join(p.value for p in self.phones)}::'
-               + f'{self.birthday.value if self.birthday else 'None'}')
+               + f'{self.birthday.value if self.birthday else "None"}')
         return ret
 
     def add_phone(self, phone):

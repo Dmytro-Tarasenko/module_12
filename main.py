@@ -108,6 +108,11 @@ def add(sequence=''):
         if len(names) > 1:
             message += ('Warning: Only 1 name can be in add command.'
                         + ' To edit name use <change> command instead.\n')
+        if len(names) == 1 and len(phones) == 0 and len(bdays) == 0:
+            message += ('There is nothing to add to existing'
+                        + f' {record.name.value} contact.\n'
+                        + 'Try another name or add some information.')
+            return 'Warning', message
     if len(bdays) > 0:
         if record.birthday is None:
             record.birthday = bdays[0]
@@ -134,13 +139,21 @@ def change(sequence=''):
 
     if len(names) <= 1:
         record = address_book.get_current_record()
+        old_name = record.name.value
         if len(names) == 1:
-            record.name = Name(names[0].capitalize())
+            new_name = names[0].capitalize()
+            record.name = Name(new_name)
+            address_book.data[new_name] = address_book.data.pop(old_name)
+            address_book.current_record_id = len(address_book.data) - 1
     elif len(names) >= 2:
         record = address_book.find(names[0].capitalize())
+        old_name = record.name.value
         if record is None:
             raise KeyError('!contact_exists')
-        record.name = Name(names[1].capitalize())
+        new_name = names[1].capitalize()
+        record.name = Name(new_name)
+        address_book.data[new_name] = address_book.data.pop(old_name)
+        address_book.current_record_id = len(address_book.data) - 1
         if len(names) > 2:
             message += ('Warning:\n\tOnly 2 names are'
                         + ' taken into account.\n')
@@ -348,7 +361,7 @@ def find(sequence=''):
         id_, name_, phones_, bday_ = row.split('::')
         phones_ = phones_.split('#')
         phone0 = '-' if len(phones_) == 0 else phones_[0]
-        bday_ = bday_ if bday_ != 'none' else '-'
+        # bday_ = bday_ if bday_ != 'none' else '-'
         rows += (f'|{id_:^5}|{name_.capitalize():^17}|'
                  + f'{phone0:^17}|{bday_:^12}|\n')
         for phone in phones_[1:]:

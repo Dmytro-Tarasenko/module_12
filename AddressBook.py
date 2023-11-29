@@ -266,7 +266,7 @@ class AddressBook(UserDict):
         name = record.name.value
         self.current_record_id = list(self.data.keys()).index(name)
 
-    def find(self, name) -> Record:
+    def find(self, name: str) -> Record:
         if name in self.data.keys():
             self.current_record_id = list(self.data.keys()).index(name)
             return self.data.get(name)

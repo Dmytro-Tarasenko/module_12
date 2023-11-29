@@ -139,31 +139,36 @@ def change(sequence=''):
 
     names, phones, bdays = tokenize_args(sequence)
 
-    if len(names) <= 1:
+    if len(names) == 0:
         record = address_book.get_current_record()
-        old_name = record.name.value
-        if len(names) == 1:
-            new_name = names[0].capitalize()
-            if new_name != old_name:
-                record.name = Name(new_name)
-                address_book.data[new_name] = address_book.data.pop(old_name)
-                address_book.current_record_id = len(address_book.data) - 1
-            elif len(phones) == 0 and len(bdays) == 0:
-                message += ('There is nothing to change for existing contact '
-                            + f'{record.name.value}.')
-                return 'Warning', message
-    elif len(names) >= 2:
+    elif len(names) == 1:
+        record = address_book.find(names[0].capitalize())  # wether record exists
+        new_name = None if record else names[0].capitalize()  # if None it`s about rename existing
+        record = record if record else address_book.get_current_record()  # if yes it`s about changing that record
+        old_name = record.name.value if new_name else None
+
+        if new_name:
+            record.name = Name(new_name)
+            address_book.data[new_name] = address_book.data.pop(old_name)
+            address_book.current_record_id = len(address_book.data) - 1
+            record = address_book.get_current_record()
+        elif len(phones) == 0 and len(bdays) == 0:
+            message += ('There is nothing to change for contact '
+                        + f'{record.name.value}.')
+            return 'Warning', message
+    elif len(names) == 2:
         record = address_book.find(names[0].capitalize())
-        old_name = record.name.value
         if record is None:
             raise KeyError('!contact_exists')
+        old_name = record.name.value
         new_name = names[1].capitalize()
         record.name = Name(new_name)
         address_book.data[new_name] = address_book.data.pop(old_name)
         address_book.current_record_id = len(address_book.data) - 1
-        if len(names) > 2:
-            message += ('Warning:\n\tOnly 2 names are'
-                        + ' taken into account.\n')
+        record = address_book.get_current_record()
+    elif len(names) > 2:
+        message += ('Warning:\n\tOnly 2 names are'
+                    + ' taken into account.\n')
 
     if len(phones) > 0:
         if len(phones) == 1:
@@ -453,6 +458,15 @@ def read_from_file(path: Path):
     return data
 
 
+def delete(sequence=''):
+    status = 'OK'
+    message = ''
+
+    names, phones, bdays = tokenize_args(sequence)
+
+    return status, message
+
+
 def main():
     global address_book
     print(HEADER)
@@ -464,7 +478,8 @@ def main():
         'show': {'func': show, 'args': True},
         'exit': {'func': exit_, 'args': False},
         'help': {'func': help, 'args': True},
-        'find': {'func': find, 'args': True}
+        'find': {'func': find, 'args': True},
+        'del': {'func': delete, 'args': True}
     }
 
     data_bin = Path('data.bin')

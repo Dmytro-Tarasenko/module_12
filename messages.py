@@ -5,7 +5,7 @@ helpmsg = {
             + 'phone number <phone_number>  to contact base.\n'
             + '\t<contact_name> contains only one word;\n'
             + '\t<phone_number> - only digits,'
-            + ' phones with 6, 7, 10 or 12 digits are acceptable;\n'
+            + ' phones from 6 to 12 digits are acceptable;\n'
             + '\t<birthday> should be in format yyyy-mm-dd or dd-mm-yyyy'
             + 'common separator are allowed [.,/\\].\n'
             + 'If no <contact_name> is provided'

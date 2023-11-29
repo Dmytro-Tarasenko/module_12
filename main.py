@@ -144,9 +144,14 @@ def change(sequence=''):
         old_name = record.name.value
         if len(names) == 1:
             new_name = names[0].capitalize()
-            record.name = Name(new_name)
-            address_book.data[new_name] = address_book.data.pop(old_name)
-            address_book.current_record_id = len(address_book.data) - 1
+            if new_name != old_name:
+                record.name = Name(new_name)
+                address_book.data[new_name] = address_book.data.pop(old_name)
+                address_book.current_record_id = len(address_book.data) - 1
+            elif len(phones) == 0 and len(bdays) == 0:
+                message += ('There is nothing to change for existing contact '
+                            + f'{record.name.value}.')
+                return 'Warning', message
     elif len(names) >= 2:
         record = address_book.find(names[0].capitalize())
         old_name = record.name.value

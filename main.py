@@ -148,6 +148,11 @@ def change(sequence=''):
         old_name = record.name.value if new_name else None
 
         if new_name:
+            print('It`s seems like you are going to change name'
+                  + ' of current record.')
+            _ = input('Do you confirm? [y/N]: ')
+            if _.lower() == 'n':
+                raise ValueError('contact_!exists')
             record.name = Name(new_name)
             address_book.data[new_name] = address_book.data.pop(old_name)
             address_book.current_record_id = len(address_book.data) - 1

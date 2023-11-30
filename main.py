@@ -116,7 +116,7 @@ def add(sequence=''):
                         + 'Try another name or add some information.')
             return 'Warning', message
     if len(bdays) > 0:
-        if record.birthday is None:
+        if record.birthday.value is None:
             record.birthday = bdays[0]
         else:
             message += (f'Warning: Record {record.name} has birthday set.'

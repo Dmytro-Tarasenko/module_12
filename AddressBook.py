@@ -79,6 +79,9 @@ class Birthday(Field):
 
     @value.setter
     def value(self, bday):
+        if bday is None:
+            self.__value = None
+            return
         if (isinstance(bday, datetime.date) or
                 isinstance(bday, Birthday)):
             _bday = bday if isinstance(bday, datetime.date)\
@@ -128,10 +131,10 @@ class Record:
     @birthday.setter
     def birthday(self, bday=None):
         if bday is None:
-            return None
+            self.__birthday = None
         self.__birthday = Birthday(bday)
 
-    def __phone_values(self):
+    def phone_values(self):
         for phone in self.phones:
             yield phone.value
 
@@ -177,7 +180,7 @@ class Record:
             raise KeyError('phone_exists')
 
     def _get_phone_ind(self, phone_str):
-        phone_lst = list(self.__phone_values())
+        phone_lst = list(self.phone_values())
         if phone_str in phone_lst:
             return phone_lst.index(phone_str)
         return None
@@ -246,7 +249,7 @@ class AddressBook(UserDict):
             self.current_record_id = id_
             return id_
 
-    def get_current_record(self):
+    def get_current_record(self) -> Record:
         if len(self.data) == 0:
             raise IndexError('mentor_detected')
         record_key = list(self.data.keys())[self.current_record_id]
@@ -267,6 +270,11 @@ class AddressBook(UserDict):
         self.current_record_id = list(self.data.keys()).index(name)
 
     def find(self, name: str) -> Record:
+        """
+
+        Returns:
+            object: 
+        """
         if name in self.data.keys():
             self.current_record_id = list(self.data.keys()).index(name)
             return self.data.get(name)

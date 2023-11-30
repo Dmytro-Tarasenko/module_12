@@ -122,7 +122,7 @@ def add(sequence=''):
             message += (f'Warning: Record {record.name} has birthday set.'
                         + ' Use <change> command instead.\n')
         if len(bdays) > 1:
-            message += 'Warning: Human can have only 1 birthday.\n'
+            raise ValueError('twice_born')
 
     if len(phones) > 0:
         for phone in phones:
@@ -159,7 +159,9 @@ def change(sequence=''):
     elif len(names) == 2:
         record = address_book.find(names[0].capitalize())
         if record is None:
-            raise KeyError('!contact_exists')
+            raise KeyError('contact_!exists')
+        if address_book.find(names[1].capitalize()):
+            raise KeyError('change_to_existing')
         old_name = record.name.value
         new_name = names[1].capitalize()
         record.name = Name(new_name)
@@ -255,13 +257,13 @@ def show(sequence=''):
     # |     |           |  2345678  |               |         |
     # |     |           |  3456789  |               |         |
     # +-----+-----------+-----------+---------------+---------+
-    def make_row(record: Record, ind=None):
+    def make_row(record: Record, ind_=None):
         name = record.name.value
 
-        if ind is None:
-            ind = address_book.get_record_id(name)
+        if ind_ is None:
+            ind_ = address_book.get_record_id(name)
 
-        if record.birthday is None:
+        if record.birthday.value is None:
             bday = days2bd = '-'
         else:
             bday = record.birthday.value
@@ -290,14 +292,9 @@ def show(sequence=''):
     for ind_ in buffer:
         inds[ind_] = ind_
 
-    # Show by ind
-    rows = []
-
     # lim[0] = 'lim:3' -> lim = 3
     lim = int(lim[0].split(':')[1]) if len(lim) == 1 else 0
-
-    # show by range
-    # decorator???
+    rows = []
     if lim == 0:
         for ind in inds:
             if ind is not None:
@@ -427,7 +424,7 @@ def help(command=''):
 
 def parse_input(sequence=''):
     """Main part of input parser"""
-    command_pattern = r'^(hello|add|change|show|exit|help|find)'
+    command_pattern = r'^(hello|add|change|show|exit|help|find|del)'
     command = ''
     args = ''
     if not sequence:
@@ -458,11 +455,127 @@ def read_from_file(path: Path):
     return data
 
 
+@input_error
+def _del_from_record(record: Record, queue_: None):
+    if queue_ is None:
+        raise RuntimeError('empty_exec')
+
+    bday = None
+    phone_victims = []
+    # {'phones': phone_victims}
+    # {'bday': bdays[0]}
+    for item in queue_:
+        if item.get('bday'):
+            bday = item.get('bday')
+        if item.get('phones'):
+            phone_victims = item.get('phones')
+
+    if bday:
+        record.birthday = None
+
+    if phone_victims:
+        phone_ind_dict = {phone: ind for ind, phone
+                          in enumerate(record.phone_values())}
+        execution_queue = [phone_ind_dict.get(num) for num in phone_victims]
+        execution_queue.sort(reverse=True)
+        for _ in execution_queue:
+            record.phones.pop(_)
+    return 'Done.'
+
+
+@input_error
+def _del_records(queue_: None):
+    if queue_ is None:
+        raise RuntimeError('empty_exec')
+
+    for victim in queue_:
+        address_book.data.pop(victim['record'].name.value)
+
+    address_book.current_record_id = 0
+
+    return 'Done.'
+
+
+def _execute(announce='', queue_=None):
+
+    if queue_ is None:
+        raise RuntimeError('empty_exec')
+    print(announce)
+
+    _ = input('Are you sure? [y/N]: ')
+    if _.lower() != 'y':
+        return 'Aborted by user.'
+
+    from_record = queue_[0].get('from')
+    if from_record:
+        return _del_from_record(from_record, queue_[1:])
+    return _del_records(queue_)
+
+
+@input_error
 def delete(sequence=''):
     status = 'OK'
     message = ''
 
     names, phones, bdays = tokenize_args(sequence)
+
+    queue_ = []
+    announce = ''
+    # no names, no phones, no bdays -> del current
+    if len(names) <= 1:
+        if len(names) == 0:
+            record = address_book.get_current_record()
+        else:
+            record = address_book.find(names[0].capitalize())
+        if record is None:
+            raise KeyError('contact_!exists')
+
+        if len(phones) == 0 and len(bdays) == 0:
+            announce += f'Record {record.name.value} will be removed.\n'
+            queue_[0:0] = [{'record': record}]
+            message += _execute(announce, queue_)
+            return status, message
+
+        if len(phones) > 0:
+            announce += ('\nFollowing phone(s) will be removed '
+                         + f'from record {record.name.value}: ')
+            phone_victims = []
+            for phone in phones:
+                if phone in record.phone_values():
+                    phone_victims.append(phone)
+                    announce += f' {phone}'
+                else:
+                    raise KeyError('phone_not_found')
+            queue_[0:0] = [{'phones': phone_victims}]
+
+        if len(bdays) > 1:
+            raise ValueError('twice_born')
+        if len(bdays) == 1:
+            if str(record.birthday.value) == bdays[0]:
+                announce += (f'\nBirthday {bdays[0]} will be removed'
+                             + f' from record {record.name.value}')
+                queue_[0:0] = [{'bday': bdays[0]}]
+            else:
+                raise KeyError('bday_not_found')
+
+        queue_[0:0] = [{'from': record}]
+        message += _execute(announce, queue_)
+
+        return status, message
+
+    if len(names) > 1:
+        if len(phones) > 0 or len(bdays) > 0:
+            raise ValueError('uncertain_del')
+        announce += 'Following records will be removed:'
+        for name in names:
+            record = address_book.find(name.capitalize())
+            if record:
+                announce += f' {record.name.value}'
+                queue_[0:0] = [{'record': record}]
+            else:
+                raise KeyError('contact_!exists')
+
+        message += _execute(announce, queue_)
 
     return status, message
 

@@ -34,7 +34,14 @@ helpmsg = {
     'help': ('help [<command>]\n'
              + 'Displays help info for <command>\n'
              + '\tList of available commands: hello, add,'
-             + ' change, phone, show, exit, help, find.\n=====')
+             + ' change, phone, show, exit, help, find.\n====='),
+    'del': ('del [<name(s)> | <phone(s)> | <birthday>]\n'
+            + 'Removes record(s) with <name(s)> or respective fields for'
+            + ' record <name>\n'
+            + 'If no <name> is specified current record is used. So "del"'
+            + ' with no arguments deletes current record\n'
+            + 'If multiple <name(s)> are specified no other fields'
+            + ' are allowed\n=====')
 }
 
 errormsg = {
@@ -53,15 +60,22 @@ errormsg = {
                    + 'Try to fill it first.'),
     'mentor_detected': ('Really!? Doing stuff with no records!?\n'
                         + 'Ulyana, are you here?\n'
-                        + 'If yes, THANKS ALOT!'),
+                        + 'If yes, THANKS ALOT!\n'),
     'contact_exists': ('Contact`ve been already recorded.'
-                       + ' Try another name.'),
+                       + ' Try another name.\n'),
     'phone_exists': ('Phone`ve been already recorded.'
-                     + ' Try another one.'),
-    '!contact_exists': 'Contact does not exist. Try another name.',
-    'params_absense': 'No needed parameter(s) was(were) provided.',
-    'not_enough_phones': 'Unable to determine phone to change.',
-    'bad_search_cond': 'Bad search condition were provided.',
-    'uncertain_show': 'Unable to determine condition for <show>.',
-    'index_error': 'Given indexes are invalid.'
+                     + ' Try another one.\n'),
+    'phone_not_found': 'Given phone is not found in record.\n',
+    'contact_!exists': 'Contact does not exist. Try another name.\n',
+    'params_absense': 'No needed parameter(s) was(were) provided.\n',
+    'not_enough_phones': 'Unable to determine phone to change.\n',
+    'bad_search_cond': 'Bad search condition were provided.\n',
+    'uncertain_show': 'Unable to determine condition for <show>.\n',
+    'index_error': 'Given indexes are invalid.]n',
+    'change_to_existing': ('Unable to change name'
+                           + ' to name of existing contact.\n'),
+    'twice_born': 'Humans got only 1 birthday.\n',
+    'bday_not_found': 'Given birthday does not match with recorded one.\n',
+    'uncertain_del': 'Uncertain entities for removal.\n',
+    'empty_exec': 'Executioner needs victims. Something really gone wrong.\n'
 }
